@@ -1,26 +1,33 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Finger Ninja</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         body {
             overflow: hidden;
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            touch-action: manipulation;
         }
 
         #container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
 
         #video {
@@ -53,21 +60,21 @@
 
         #ui {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 10px;
+            left: 10px;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             z-index: 10;
         }
 
         #score {
-            font-size: 48px;
+            font-size: clamp(32px, 8vw, 48px);
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         #timer {
-            font-size: 32px;
+            font-size: clamp(24px, 6vw, 32px);
         }
 
         #startScreen, #gameOverScreen {
@@ -76,12 +83,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 100;
+            padding: 20px;
         }
 
         #gameOverScreen {
@@ -90,20 +98,23 @@
 
         h1 {
             color: #FFD700;
-            font-size: 72px;
-            margin-bottom: 20px;
+            font-size: clamp(36px, 10vw, 72px);
+            margin-bottom: 15px;
+            text-align: center;
             text-shadow: 4px 4px 8px rgba(0,0,0,0.8);
         }
 
         .subtitle {
             color: white;
-            font-size: 24px;
-            margin-bottom: 40px;
+            font-size: clamp(16px, 4vw, 24px);
+            margin-bottom: 30px;
+            text-align: center;
+            padding: 0 20px;
         }
 
         button {
-            padding: 20px 60px;
-            font-size: 28px;
+            padding: clamp(15px, 4vw, 20px) clamp(40px, 10vw, 60px);
+            font-size: clamp(20px, 5vw, 28px);
             font-weight: bold;
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -112,20 +123,19 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            min-width: 200px;
+            min-height: 60px;
+            margin: 10px;
         }
 
-        button:hover {
-            transform: translateY(-3px);
+        button:hover, button:active {
+            transform: translateY(-2px);
             box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
         }
 
         #finalScore {
             color: #FFD700;
-            font-size: 64px;
+            font-size: clamp(48px, 12vw, 64px);
             margin: 20px 0;
         }
 
@@ -135,23 +145,73 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: white;
-            font-size: 24px;
+            font-size: clamp(18px, 4vw, 24px);
             z-index: 1000;
+            text-align: center;
         }
 
         .lives {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 36px;
+            top: 10px;
+            right: 10px;
+            font-size: clamp(24px, 6vw, 36px);
             color: #ff4444;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             z-index: 10;
         }
+
+        .instructions {
+            color: white;
+            font-size: clamp(14px, 3vw, 18px);
+            margin-top: 20px;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 500px;
+        }
+
+        /* Telefon uchun ekran aylantirish ogohlantirishi */
+        @media (max-height: 500px) {
+            h1 {
+                font-size: clamp(28px, 8vw, 36px);
+            }
+            
+            button {
+                padding: 12px 30px;
+                font-size: 18px;
+            }
+        }
+
+        /* Ekran aylantirishni qayta ishlash */
+        @media (orientation: landscape) {
+            #ui {
+                top: 5px;
+                left: 5px;
+            }
+            
+            .lives {
+                top: 5px;
+                right: 5px;
+            }
+        }
+
+        /* Kichik ekranlar uchun */
+        @media (max-width: 480px) {
+            #score {
+                font-size: 28px;
+            }
+            
+            #timer {
+                font-size: 20px;
+            }
+            
+            .lives {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="loading">Загрузка...</div>
+    <div id="loading">Yuklanmoqda...</div>
     <div id="container">
         <video id="video" autoplay playsinline></video>
         <canvas id="canvas"></canvas>
@@ -166,14 +226,15 @@
 
         <div id="startScreen">
             <h1>🥷 FINGER NINJA 🥷</h1>
-            <p class="subtitle">Разрезайте фрукты пальцем, избегайте бомб!</p>
-            <button onclick="startGame()">НАЧАТЬ ИГРУ</button>
+            <p class="subtitle">Mevalarni barmog'ingiz bilan kesing, bombalardan qoching!</p>
+            <button onclick="startGame()">OYNI BOSHLASH</button>
+            <p class="instructions">Barmog'ingizni kameraga ko'rsating va mevalarni kesing. Har bir kesilgan meva uchun ball olasiz, lekin bombalarni kesmang!</p>
         </div>
 
         <div id="gameOverScreen">
-            <h1>ИГРА ОКОНЧЕНА!</h1>
+            <h1>OYIN TUGADI!</h1>
             <div id="finalScore">0</div>
-            <button onclick="restartGame()">ИГРАТЬ СНОВА</button>
+            <button onclick="restartGame()">QAYTA BOSHLASH</button>
         </div>
     </div>
 
@@ -197,81 +258,129 @@
         let particles = [];
         let gameTimer = null;
         let spawnTimer = null;
+        let lastSpawnTime = 0;
+        const spawnInterval = 800; // 800ms da 1 marta
 
-        // Звуковые эффекты
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        // Ovoz efekti uchun
+        const sounds = {
+            slice: null,
+            bomb: null
+        };
+
+        // Ovoz fayllarini yaratish
+        function createAudioContext() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                return new AudioContext();
+            } catch (e) {
+                console.log("AudioContext qo'llab-quvvatlanmaydi");
+                return null;
+            }
+        }
+
+        const audioContext = createAudioContext();
         
         function playSliceSound() {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            if (!audioContext) return;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            } catch (e) {
+                console.log("Ovoz chalishda xato:", e);
+            }
         }
         
         function playBombSound() {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            if (!audioContext) return;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            
-            oscillator.type = 'sawtooth';
-            oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.3);
-            
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log("Bomba ovozida xato:", e);
+            }
         }
 
-        // Классы фруктов
+        // Meva turlari
         const fruitTypes = [
-            { name: 'apple', color: '#ff4444', emoji: '🍎', points: 10 },
-            { name: 'orange', color: '#ff8833', emoji: '🍊', points: 10 },
-            { name: 'banana', color: '#ffee33', emoji: '🍌', points: 15 },
-            { name: 'watermelon', color: '#44ff88', emoji: '🍉', points: 20 },
-            { name: 'bomb', color: '#333333', emoji: '💣', points: -50, isBomb: true }
+            { name: 'olma', color: '#ff4444', emoji: '🍎', points: 10 },
+            { name: 'apelsin', color: '#ff8833', emoji: '🍊', points: 10 },
+            { name: 'banan', color: '#ffee33', emoji: '🍌', points: 15 },
+            { name: 'tarvuz', color: '#44ff88', emoji: '🍉', points: 20 },
+            { name: 'bomba', color: '#333333', emoji: '💣', points: -50, isBomb: true }
         ];
 
         class Fruit {
             constructor() {
-                const type = Math.random() < 0.15 ? fruitTypes[4] : fruitTypes[Math.floor(Math.random() * 4)];
+                const isBomb = Math.random() < 0.1; // 10% bomba
+                const type = isBomb ? fruitTypes[4] : fruitTypes[Math.floor(Math.random() * 4)];
                 this.type = type;
-                // Спавн в центральной 70% области экрана по горизонтали
-                const margin = gameCanvas.width * 0.15;
-                this.x = margin + Math.random() * (gameCanvas.width - margin * 2);
                 
-                // Спавн снизу за экраном
-                this.y = gameCanvas.height + 50;
+                // Ekran o'lchamini olish
+                const width = gameCanvas.width;
+                const height = gameCanvas.height;
                 
-                // Более сильный начальный импульс вверх для достижения верхней половины экрана
+                // Markaziy 80% hududda paydo bo'lish
+                const margin = width * 0.1;
+                this.x = margin + Math.random() * (width - margin * 2);
+                
+                // Pastdan tashqarida paydo bo'lish
+                this.y = height + 50;
+                
+                // Tezlik
                 this.vx = (Math.random() - 0.5) * 4;
-                this.vy = -(14 + Math.random() * 8); // Увеличенная скорость вверх
+                this.vy = -(12 + Math.random() * 6);
                 
                 this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.15;
-                this.size = 50 + Math.random() * 20;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.1;
+                this.size = Math.min(40 + Math.random() * 20, width * 0.1); // Ekran o'lchamiga mos
                 this.sliced = false;
-                this.gravity = 0.4; // Немного увеличенная гравитация для красивой дуги
+                this.gravity = 0.35;
+                this.age = 0;
             }
 
             update() {
+                this.age++;
                 this.vy += this.gravity;
                 this.x += this.vx;
                 this.y += this.vy;
                 this.rotation += this.rotationSpeed;
+                
+                // Ekran chegaralaridan qaytish
+                if (this.x < this.size) {
+                    this.x = this.size;
+                    this.vx *= -0.8;
+                }
+                if (this.x > gameCanvas.width - this.size) {
+                    this.x = gameCanvas.width - this.size;
+                    this.vx *= -0.8;
+                }
             }
 
             draw() {
@@ -286,28 +395,29 @@
             }
 
             isOffScreen() {
-                return this.y > gameCanvas.height + 100;
+                return this.y > gameCanvas.height + 100 || this.x < -100 || this.x > gameCanvas.width + 100;
             }
 
             checkCollision(x, y) {
                 const dx = this.x - x;
                 const dy = this.y - y;
-                return Math.sqrt(dx * dx + dy * dy) < this.size / 2;
+                return Math.sqrt(dx * dx + dy * dy) < this.size / 1.5;
             }
 
             slice() {
                 if (this.sliced) return;
                 this.sliced = true;
 
-                // Создание частиц
-                for (let i = 0; i < 15; i++) {
+                // Zarralarni yaratish
+                const particleCount = this.type.isBomb ? 20 : 10;
+                for (let i = 0; i < particleCount; i++) {
                     particles.push({
                         x: this.x,
                         y: this.y,
-                        vx: (Math.random() - 0.5) * 10,
-                        vy: (Math.random() - 0.5) * 10 - 5,
+                        vx: (Math.random() - 0.5) * 8,
+                        vy: (Math.random() - 0.5) * 8 - 3,
                         color: this.type.color,
-                        size: Math.random() * 8 + 4,
+                        size: Math.random() * 6 + 3,
                         life: 1
                     });
                 }
@@ -319,21 +429,10 @@
                     if (lives <= 0) {
                         endGame();
                     }
-                    // Эффект взрыва
-                    for (let i = 0; i < 30; i++) {
-                        particles.push({
-                            x: this.x,
-                            y: this.y,
-                            vx: (Math.random() - 0.5) * 20,
-                            vy: (Math.random() - 0.5) * 20,
-                            color: '#ff6600',
-                            size: Math.random() * 12 + 6,
-                            life: 1
-                        });
-                    }
                 } else {
                     playSliceSound();
                     score += this.type.points;
+                    if (score < 0) score = 0;
                     updateScore();
                 }
             }
@@ -348,21 +447,25 @@
         }
 
         function updateLives() {
-            document.getElementById('lives').textContent = '❤️'.repeat(lives);
+            document.getElementById('lives').textContent = '❤️'.repeat(Math.max(0, lives));
         }
 
         function spawnFruit() {
             if (!gameActive) return;
-            fruits.push(new Fruit());
+            const now = Date.now();
+            if (now - lastSpawnTime > spawnInterval) {
+                fruits.push(new Fruit());
+                lastSpawnTime = now;
+            }
         }
 
         function updateGame() {
             if (!gameActive) return;
 
-            // Очистка игрового canvas
+            // O'yin canvasi tozalash
             gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
 
-            // Обновление и отрисовка фруктов
+            // Mevalarni yangilash va chizish
             fruits = fruits.filter(fruit => {
                 fruit.update();
                 if (!fruit.sliced) {
@@ -370,23 +473,18 @@
                 }
                 
                 if (fruit.isOffScreen() && !fruit.sliced && !fruit.type.isBomb) {
-                    // Фрукт упал - минус жизнь
-                    lives--;
-                    updateLives();
-                    if (lives <= 0) {
-                        endGame();
-                    }
                     return false;
                 }
                 
                 return !fruit.isOffScreen();
             });
 
-            // След пальца
+            // Barmoq izi
             if (sliceTrail.length > 0) {
-                gameCtx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-                gameCtx.lineWidth = 5;
+                gameCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                gameCtx.lineWidth = 4;
                 gameCtx.lineCap = 'round';
+                gameCtx.lineJoin = 'round';
                 gameCtx.beginPath();
                 gameCtx.moveTo(sliceTrail[0].x, sliceTrail[0].y);
                 for (let i = 1; i < sliceTrail.length; i++) {
@@ -394,7 +492,7 @@
                 }
                 gameCtx.stroke();
 
-                // Проверка столкновений со следом
+                // To'qnashuvni tekshirish
                 sliceTrail.forEach(point => {
                     fruits.forEach(fruit => {
                         if (!fruit.sliced && fruit.checkCollision(point.x, point.y)) {
@@ -404,12 +502,12 @@
                 });
             }
 
-            // Частицы
+            // Zarralar
             particles = particles.filter(p => {
-                p.vy += 0.3;
+                p.vy += 0.2;
                 p.x += p.vx;
                 p.y += p.vy;
-                p.life -= 0.02;
+                p.life -= 0.03;
 
                 if (p.life > 0) {
                     gameCtx.fillStyle = p.color;
@@ -423,21 +521,21 @@
                 return false;
             });
 
-            // Отрисовка позиции пальца - яркая жёлтая точка
+            // Barmoq nuqtasi
             if (fingerTip) {
-                // Внешнее свечение
-                gameCtx.shadowBlur = 20;
-                gameCtx.shadowColor = 'rgba(255, 255, 0, 0.8)';
-                gameCtx.fillStyle = 'rgba(255, 255, 0, 0.9)';
+                // Tashqi yorug'lik
+                gameCtx.shadowBlur = 15;
+                gameCtx.shadowColor = 'rgba(255, 255, 0, 0.7)';
+                gameCtx.fillStyle = 'rgba(255, 255, 0, 0.8)';
                 gameCtx.beginPath();
-                gameCtx.arc(fingerTip.x, fingerTip.y, 18, 0, Math.PI * 2);
+                gameCtx.arc(fingerTip.x, fingerTip.y, 15, 0, Math.PI * 2);
                 gameCtx.fill();
                 
-                // Внутренний круг
+                // Ichki doira
                 gameCtx.shadowBlur = 0;
-                gameCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                gameCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 gameCtx.beginPath();
-                gameCtx.arc(fingerTip.x, fingerTip.y, 8, 0, Math.PI * 2);
+                gameCtx.arc(fingerTip.x, fingerTip.y, 6, 0, Math.PI * 2);
                 gameCtx.fill();
             }
 
@@ -451,12 +549,13 @@
             lives = 3;
             fruits = [];
             particles = [];
+            sliceTrail = [];
             gameActive = true;
             updateScore();
             updateTimer();
             updateLives();
 
-            // Таймер игры
+            // O'yin taymeri
             gameTimer = setInterval(() => {
                 timeLeft--;
                 updateTimer();
@@ -465,8 +564,8 @@
                 }
             }, 1000);
 
-            // Спавн фруктов
-            spawnTimer = setInterval(spawnFruit, 800);
+            // Meva chiqarish
+            spawnTimer = setInterval(spawnFruit, spawnInterval);
 
             updateGame();
         }
@@ -493,7 +592,7 @@
 
         hands.setOptions({
             maxNumHands: 1,
-            modelComplexity: 1,
+            modelComplexity: 0,
             minDetectionConfidence: 0.5,
             minTrackingConfidence: 0.5
         });
@@ -501,99 +600,125 @@
         hands.onResults(onResults);
 
         function onResults(results) {
-            ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            
+            if (results.image) {
+                ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+            }
 
             if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
                 const landmarks = results.multiHandLandmarks[0];
-                const indexTip = landmarks[8]; // Кончик указательного пальца
-
-                // Преобразование координат (отзеркалено для естественного управления)
-                const x = (1 - indexTip.x) * gameCanvas.width;
-                const y = indexTip.y * gameCanvas.height;
-
-                fingerTip = { x, y };
-
-                // Добавление в след
-                sliceTrail.push({ x, y });
-                if (sliceTrail.length > 15) {
-                    sliceTrail.shift();
+                if (landmarks.length > 8) {
+                    const indexTip = landmarks[8]; // Ko'rsatkich barmog'i uchi
+                    
+                    // Koordinatalarni o'zgartirish
+                    const x = (1 - indexTip.x) * gameCanvas.width;
+                    const y = indexTip.y * gameCanvas.height;
+                    
+                    fingerTip = { x, y };
+                    
+                    // Izga qo'shish
+                    sliceTrail.push({ x, y });
+                    if (sliceTrail.length > 10) {
+                        sliceTrail.shift();
+                    }
                 }
             } else {
                 sliceTrail = [];
                 fingerTip = null;
             }
-
-            ctx.restore();
         }
 
-        function drawConnectors(ctx, landmarks, connections, style) {
-            ctx.strokeStyle = style.color;
-            ctx.lineWidth = style.lineWidth;
-            connections.forEach(([start, end]) => {
-                const startPoint = landmarks[start];
-                const endPoint = landmarks[end];
-                ctx.beginPath();
-                ctx.moveTo((1 - startPoint.x) * canvas.width, startPoint.y * canvas.height);
-                ctx.lineTo((1 - endPoint.x) * canvas.width, endPoint.y * canvas.height);
-                ctx.stroke();
-            });
-        }
-
-        function drawLandmarks(ctx, landmarks, style) {
-            ctx.fillStyle = style.color;
-            landmarks.forEach(landmark => {
-                ctx.beginPath();
-                ctx.arc((1 - landmark.x) * canvas.width, landmark.y * canvas.height, 3, 0, 2 * Math.PI);
-                ctx.fill();
-            });
-        }
-
-        const HAND_CONNECTIONS = [
-            [0,1],[1,2],[2,3],[3,4],
-            [0,5],[5,6],[6,7],[7,8],
-            [5,9],[9,10],[10,11],[11,12],
-            [9,13],[13,14],[14,15],[15,16],
-            [13,17],[17,18],[18,19],[19,20],[0,17]
-        ];
-
-        // Инициализация камеры
+        // Kamera ishga tushirish
         async function initCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: { 
                         facingMode: 'user',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    }
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    },
+                    audio: false
                 });
+                
                 video.srcObject = stream;
                 
-                video.onloadedmetadata = () => {
-                    canvas.width = video.videoWidth;
-                    canvas.height = video.videoHeight;
-                    gameCanvas.width = video.videoWidth;
-                    gameCanvas.height = video.videoHeight;
-                    
-                    loading.style.display = 'none';
-                    
-                    const camera = new Camera(video, {
-                        onFrame: async () => {
-                            await hands.send({image: video});
-                        },
-                        width: video.videoWidth,
-                        height: video.videoHeight
-                    });
-                    camera.start();
-                };
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        canvas.width = gameCanvas.width = window.innerWidth;
+                        canvas.height = gameCanvas.height = window.innerHeight;
+                        
+                        loading.style.display = 'none';
+                        resolve();
+                    };
+                });
+                
             } catch (error) {
-                loading.textContent = 'Ошибка доступа к камере. Разрешите доступ к камере.';
-                console.error('Camera error:', error);
+                loading.textContent = 'Kameraga ruxsat yo\'q. Iltimos, kameraga ruxsat bering.';
+                console.error('Kamera xatosi:', error);
+                
+                // Test rejimi - agar kamera ishlamasa
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                    canvas.width = gameCanvas.width = window.innerWidth;
+                    canvas.height = gameCanvas.height = window.innerHeight;
+                    
+                    // Test uchun barmoqni simulyatsiya qilish
+                    document.addEventListener('mousemove', (e) => {
+                        fingerTip = { x: e.clientX, y: e.clientY };
+                        sliceTrail.push({ x: e.clientX, y: e.clientY });
+                        if (sliceTrail.length > 10) sliceTrail.shift();
+                    });
+                    
+                    document.addEventListener('touchmove', (e) => {
+                        e.preventDefault();
+                        if (e.touches[0]) {
+                            fingerTip = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                            sliceTrail.push({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+                            if (sliceTrail.length > 10) sliceTrail.shift();
+                        }
+                    }, { passive: false });
+                }, 2000);
             }
         }
 
-        initCamera();
+        // Dastlabki ishga tushirish
+        window.addEventListener('load', async () => {
+            await initCamera();
+            
+            if (video.srcObject) {
+                const camera = new Camera(video, {
+                    onFrame: async () => {
+                        await hands.send({image: video});
+                    },
+                    width: video.videoWidth || 640,
+                    height: video.videoHeight || 480
+                });
+                camera.start();
+            }
+        });
+
+        // Ekran o'lchamini o'zgartirganda
+        window.addEventListener('resize', () => {
+            canvas.width = gameCanvas.width = window.innerWidth;
+            canvas.height = gameCanvas.height = window.innerHeight;
+        });
+
+        // Telefon uchun ekran aylantirishni boshqarish
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                canvas.width = gameCanvas.width = window.innerWidth;
+                canvas.height = gameCanvas.height = window.innerHeight;
+            }, 100);
+        });
+
+        // Oldini olish: sahifani yuklashni oldini olish
+        window.addEventListener('beforeunload', (e) => {
+            if (gameActive) {
+                e.preventDefault();
+                e.returnValue = 'O\'yin davom etmoqda. Sahifani tark etishni xohlaysizmi?';
+            }
+        });
     </script>
 </body>
 </html>
